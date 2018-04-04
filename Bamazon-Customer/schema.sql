@@ -1,46 +1,28 @@
---Create Datebase to hold products--
-DROP DATABASE IF EXIST bamazon;
+DROP DATABASE IF EXISTS bamazon;
 CREATE DATABASE bamazon;
 
 USE bamazon;
 
 CREATE TABLE products(
-    id INT AUTO-INCREMENT NOT NULL
-    product_name VARCHAR(30) NOT NULL,
-    department VARCHAR(30) NOT NULL,
-    price DECIMAL(10,2)
-    product_quantity INT(10) NOT NULL,
-    primary key(id)
+  item_id INT AUTO_INCREMENT NOT NULL,
+  product_name VARCHAR(45) NOT NULL,
+  department_name VARCHAR(45) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  stock_quantity INT(10) NOT NULL,
+  primary key(item_id)
 );
---Create actual products--
+
 SELECT * FROM products;
 
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Hat", "Clothing", 20.99, 100);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Flannel Shirt", "Clothing", 30.50, 25);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Laptop", "Electronics", 899.99, 20);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("TV", "Electronics", 299.79, 50);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Basketball", "Sports", 30.00, 200);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Bat", "Sports", 200.99, 70);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Glove", "Sports", 149.99, 120);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Necklace", "Jewerly", 400.99, 10);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("Ring", "Jewerly", 2000.99, 30);
-
-INSERT INTO products(product_name, department, price, product_quantity)
-VALUES("s", "Jewerly", 5000.99, 20);
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Hat", "Clothing", 20.99, 100),
+  ("Flannel Shirt", "Clothing", 30.50, 50),
+  ("Laptop", "Electronics", 899.99, 20),
+  ("TV", "Electronics", 299.79, 50),
+  ("Basketball", "Sports", 30.00, 200),
+  ("Bat", "Sports", 200.99, 70),
+  ("Glove", "Sports", 149.99, 120),
+  ("Necklace", "Jewerly", 400.99, 10),
+  ("Ring", "Jewerly", 2000.99, 30),
+  ("Bracelet", "Jewerly", 5000.99, 20);
+  

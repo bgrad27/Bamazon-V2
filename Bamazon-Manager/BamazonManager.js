@@ -1,56 +1,52 @@
-// Initializes packages
+// Requires
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 require("console.table");
 
-// Initializes connection
+// Connection
 var connection = mysql.createConnection({
     host: "localhost",
-    port: 3454,
-
-    // Your username
+    port: 3306,
     user: "root",
-
-    // Your password
     password: "",
     database: "bamazon"
 });
 
-// Creating connection to load server
+// Creates connection for manager menu
 connection.connect(function (err) {
     if (err) {
-        console.error("Error: " + err.stack);
+        console.error("error connecting: " + err.stack);
     }
-    loadProducts();
+    loadManagerMenu();
 });
 
-// Function to get prodcuts to render in console
-function loadProducts() {
+// Get products
+function loadManagerMenu() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
 
-        // Load the possible manager menu Prompt, pass in the products data
-        loadManagerPrompt(res);
+        // Manager options
+        loadManagerOptions(res);
     });
 }
 
-// Load the manager Prompt and pass in the products data from the database
-function loadManagerPrompt(products) {
+// Load Manger options
+function loadManagerOptions(products) {
     inquirer
         .prompt({
             type: "list",
             name: "choice",
-            choices: ["Products for Sale", "What product is  on inventory", "Add to Inventory", "Add New Product", "Quit"],
-            message: "What's the move el hefe?"
+            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Quit"],
+            message: "What would you like to do?"
         })
         .then(function (val) {
             switch (val.choice) {
                 case "View Products for Sale":
                     console.table(products);
-                    loadProducts();
+                    loadManagerMenu();
                     break;
-                case "What product is  on inventory":
-                    loadInventory();
+                case "View Low Inventory":
+                    loadLowInventory();
                     break;
                 case "Add to Inventory":
                     addToInventory(products);
@@ -59,25 +55,25 @@ function loadManagerPrompt(products) {
                     promptManagerForNewProduct(products);
                     break;
                 default:
-                    console.log("See yah!");
+                    console.log("Goodbye!");
                     process.exit(0);
                     break;
             }
         });
 }
 
-// run a funciton to load the inventory
-function loadInventory() {
-    // Show any product that has lower than 5 products in the inventory
+// DB for showing low inventory
+function loadLowInventory() {
+    // Selects all of the products that have a quantity of 5 or less
     connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function (err, res) {
         if (err) throw err;
-        // show the table with the results and run the loadProducts function
+        // Draw the table in the terminal using the response, load the manager menu
         console.table(res);
-        loadProducts();
+        loadManagerMenu();
     });
 }
 
-// Make a prompt for the manager to add to the inventory
+// Prompt the manager for a product to replenish
 function addToInventory(inventory) {
     console.table(inventory);
     inquirer
@@ -85,7 +81,7 @@ function addToInventory(inventory) {
             {
                 type: "input",
                 name: "choice",
-                message: "What is the product of the ID that you want to add inventory to?",
+                message: "What is the ID of the item you would you like add to?",
                 validate: function (val) {
                     return !isNaN(val);
                 }
@@ -95,20 +91,18 @@ function addToInventory(inventory) {
             var choiceId = parseInt(val.choice);
             var product = checkInventory(choiceId, inventory);
 
-            // If they enter the right id
+            // If else if product id is correct
             if (product) {
-                // Pass the chosen product to promptCustomerForQuantity
                 promptManagerForQuantity(product);
             }
             else {
-                // run a message if they don't choose a matching id
                 console.log("\nThat item is not in the inventory.");
-                loadProducts();
+                loadManagerMenu();
             }
         });
 }
 
-// Ask for the quantity that should be added to the chosen product
+// Ask for the quantity that should be added
 function promptManagerForQuantity(product) {
     inquirer
         .prompt([
@@ -127,20 +121,20 @@ function promptManagerForQuantity(product) {
         });
 }
 
-// Updates quantity
+// Updates quantity of selected product
 function addQuantity(product, quantity) {
     connection.query(
         "UPDATE products SET stock_quantity = ? WHERE item_id = ?",
         [product.stock_quantity + quantity, product.item_id],
         function (err, res) {
-            // Run a log to know it worked
+            // Let them know that product was added
             console.log("\nSuccessfully added " + quantity + " " + product.product_name + "'s!\n");
-            loadProducts();
+            loadManagerMenu();
         }
     );
 }
 
-// Runs a prompt to ask questions to manager
+//Ask product questions
 function promptManagerForNewProduct(products) {
     inquirer
         .prompt([
@@ -183,13 +177,13 @@ function addNewProduct(val) {
         function (err, res) {
             if (err) throw err;
             console.log(val.product_name + " ADDED TO BAMAZON!\n");
-            // When done, re run loadProducts, effectively restarting our app
-            loadProducts();
+            // When done, re run loadManagerMenu, effectively restarting our app
+            loadManagerMenu();
         }
     );
 }
 
-// Make an array for departments
+// Take an array of product objects, return an array of their unique departments
 function getDepartments(products) {
     var departments = [];
     for (var i = 0; i < products.length; i++) {
@@ -200,7 +194,7 @@ function getDepartments(products) {
     return departments;
 }
 
-// Checks to see if the users choice matches an id we have in the db
+// Check to see if the product the user chose exists in the inventory
 function checkInventory(choiceId, inventory) {
     for (var i = 0; i < inventory.length; i++) {
         if (inventory[i].item_id === choiceId) {
