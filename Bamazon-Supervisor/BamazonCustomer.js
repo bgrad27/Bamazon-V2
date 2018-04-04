@@ -37,3 +37,20 @@ function loadProducts() {
 }
 
 //Now to write prompt
+
+function customerQuestions(inventory) {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "itemPicked",
+                message: "What product do you want? If you'd like to quit press q",
+                validate: function (val) {
+                    return val > 0 || val.toLowerCase() === 'q';
+                }
+            }
+        ])
+    then(function (val) {
+        userExit
+    })
+}
