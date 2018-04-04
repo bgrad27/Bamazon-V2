@@ -6,7 +6,7 @@ require("console.table");
 // Connect host with mysql
 var connection = mysql.createConnection({
     host: "localhost",
-    port: 3200,
+    port: 3454,
 
     // Your username
     user: "root",
